@@ -16,7 +16,7 @@ public class Film {
     @NotNull
     @NotBlank
     @NotEmpty
-    @Pattern(regexp="^\\w{1,200}$")
+    @Pattern(regexp="^.{1,200}$")
     private String description;
     @NotNull
     private LocalDate releaseDate;

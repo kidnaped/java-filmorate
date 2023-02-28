@@ -13,7 +13,6 @@ import java.util.*;
 @RequestMapping("/users")
 @Slf4j
 public class UserController {
-//    private List<User> users = new ArrayList<>();
     private final SortedMap<Integer, User> users = new TreeMap<>();
 
     @PostMapping
@@ -29,10 +28,11 @@ public class UserController {
             user.setId(users.size() + 1);
             users.put(user.getId(), user);
             log.debug("New user {} added.", user.getName());
+            return user;
         } catch (ResponseStatusException e) {
             log.warn("Failed to add new user: " + e.getMessage());
+            throw new ResponseStatusException(e.getStatus(), e.getMessage());
         }
-        return user;
     }
 
     @PutMapping
@@ -44,13 +44,14 @@ public class UserController {
                 }
                 users.put(user.getId(), user);
                 log.debug("Users {} data updated.", user.getName());
+                return user;
             } else {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User is not found.");
             }
         } catch (ResponseStatusException e) {
-            log.warn("Failed to update user's data {}", e.getMessage());
+            log.warn("Failed to update user's data: {}", e.getMessage());
+            throw new ResponseStatusException(e.getStatus(), e.getMessage());
         }
-        return user;
     }
 
     @GetMapping

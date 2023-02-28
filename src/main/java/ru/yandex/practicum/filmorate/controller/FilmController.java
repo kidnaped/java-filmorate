@@ -28,28 +28,30 @@ public class FilmController {
             film.setId(films.size() + 1);
             films.put(film.getId(), film);
             log.debug("Film {} added.", film.getName());
+            return film;
         } catch (ResponseStatusException e) {
             log.warn("Failed to add film: {}", e.getMessage());
+            throw new ResponseStatusException(e.getStatus(), e.getMessage());
         }
-        return film;
     }
 
     @PutMapping
     public Film updateFilm(@Valid @RequestBody Film film) {
         try {
-            if (film.getReleaseDate().isBefore(LocalDate.of(1985, 12, 28))) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Film release date must be after 28/12/1985.");
-            }
             if (films.containsKey(film.getId())) {
+                if (film.getReleaseDate().isBefore(LocalDate.of(1985, 12, 28))) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Film release date must be after 28/12/1985.");
+                }
                 films.put(film.getId(), film);
                 log.debug("Film {} data updated.", film.getName());
+                return film;
             } else {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Film is not found.");
             }
         } catch (ResponseStatusException e) {
             log.warn("Failed to update film: {}", e.getMessage());
+            throw new ResponseStatusException(e.getStatus(), e.getMessage());
         }
-        return film;
     }
 
     @GetMapping
