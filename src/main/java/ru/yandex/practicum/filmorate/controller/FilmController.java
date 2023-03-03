@@ -22,7 +22,7 @@ public class FilmController {
             if (films.containsValue(film)) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Film is already registered.");
             }
-            if (film.getReleaseDate().isBefore(LocalDate.of(1985, 12, 28))) {
+            if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Film release date must be after 28/12/1985.");
             }
             film.setId(films.size() + 1);
@@ -57,5 +57,9 @@ public class FilmController {
     @GetMapping
     public List<Film> getFilms() {
         return new ArrayList<>(films.values());
+    }
+
+    protected void clear() {
+        films.clear();
     }
 }

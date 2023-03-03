@@ -58,4 +58,8 @@ public class UserController {
     public List<User> getUsers() {
         return new ArrayList<>(users.values());
     }
+
+    protected void clear() {
+        users.clear();
+    }
 }
