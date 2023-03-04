@@ -15,6 +15,7 @@ import java.util.*;
 @Slf4j
 public class FilmController {
     private final SortedMap<Integer, Film> films = new TreeMap<>();
+    private int id = 0;
 
     @PostMapping
     public Film addFilm(@Valid @RequestBody Film film) {
@@ -22,10 +23,8 @@ public class FilmController {
             if (films.containsValue(film)) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Film is already registered.");
             }
-            if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Film release date must be after 28/12/1985.");
-            }
-            film.setId(films.size() + 1);
+            validateReleaseDate(film);
+            film.setId(generateId());
             films.put(film.getId(), film);
             log.debug("Film {} added.", film.getName());
             return film;
@@ -39,9 +38,7 @@ public class FilmController {
     public Film updateFilm(@Valid @RequestBody Film film) {
         try {
             if (films.containsKey(film.getId())) {
-                if (film.getReleaseDate().isBefore(LocalDate.of(1985, 12, 28))) {
-                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Film release date must be after 28/12/1985.");
-                }
+                validateReleaseDate(film);
                 films.put(film.getId(), film);
                 log.debug("Film {} data updated.", film.getName());
                 return film;
@@ -60,6 +57,16 @@ public class FilmController {
     }
 
     protected void clear() {
+        id = 0;
         films.clear();
+    }
+    private int generateId() {
+        return ++id;
+    }
+
+    private void validateReleaseDate(Film film) throws ResponseStatusException {
+        if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Film release date must be after 28/12/1985.");
+        }
     }
 }

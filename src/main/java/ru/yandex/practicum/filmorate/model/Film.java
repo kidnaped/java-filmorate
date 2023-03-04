@@ -9,11 +9,9 @@ import java.time.LocalDate;
 public class Film {
     @PositiveOrZero
     private int id;
-    @NotNull
     @NotBlank
     @NotEmpty
     private String name;
-    @NotNull
     @NotBlank
     @NotEmpty
     @Pattern(regexp="^.{1,200}$")

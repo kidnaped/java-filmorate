@@ -14,6 +14,7 @@ import java.util.*;
 @Slf4j
 public class UserController {
     private final SortedMap<Integer, User> users = new TreeMap<>();
+    private int id = 0;
 
     @PostMapping
     public User addUser(@Valid @RequestBody User user) {
@@ -21,12 +22,11 @@ public class UserController {
             if (users.containsValue(user)) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User is already registered.");
             }
+            manageEmptyUserName(user);
 
-            if (user.getName() == null || user.getName().isBlank() || user.getName().isEmpty()) {
-                user.setName(user.getLogin());
-            }
-            user.setId(users.size() + 1);
+            user.setId(generateId());
             users.put(user.getId(), user);
+
             log.debug("New user {} added.", user.getName());
             return user;
         } catch (ResponseStatusException e) {
@@ -39,10 +39,9 @@ public class UserController {
     public User updateUser(@Valid @RequestBody User user) {
         try {
             if (users.containsKey(user.getId())) {
-                if (user.getName() == null || user.getName().isBlank() || user.getName().isEmpty()) {
-                    user.setName(user.getLogin());
-                }
+                manageEmptyUserName(user);
                 users.put(user.getId(), user);
+
                 log.debug("Users {} data updated.", user.getName());
                 return user;
             } else {
@@ -60,6 +59,17 @@ public class UserController {
     }
 
     protected void clear() {
+        id = 0;
         users.clear();
+    }
+
+    private int generateId() {
+        return ++id;
+    }
+
+    private void manageEmptyUserName(User user) {
+        if (user.getName() == null || user.getName().isBlank() || user.getName().isEmpty()) {
+            user.setName(user.getLogin());
+        }
     }
 }
