@@ -19,6 +19,11 @@ public class UserService {
     }
 
     // addToFriendList
+    public void addToFriendList(Integer userId, Integer friendId) {
+        getUserStorage()
+                .findById(userId)
+                .addFriend(friendId);
+    }
 
 
     // removeFromFriendList
@@ -26,4 +31,7 @@ public class UserService {
 
     // getCommonFriends
 
+    private void idValidation(Integer id) {
+        if (userStorage.findAll())
+    }
 }

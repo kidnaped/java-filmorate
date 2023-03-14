@@ -1,9 +1,10 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
-import org.springframework.web.server.ResponseStatusException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.exception.FailedRegistrationException;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.time.LocalDate;
@@ -20,35 +21,30 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public Film addFilm(Film film) {
-        try {
-            if (films.containsValue(film)) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Film is already registered.");
-            }
-            validateReleaseDate(film);
-            film.setId(generateId());
-            films.put(film.getId(), film);
-            log.debug("Film {} added.", film.getName());
-            return film;
-        } catch (ResponseStatusException e) {
-            log.warn("Failed to add film: {}", e.getMessage());
-            throw new ResponseStatusException(e.getStatus(), e.getMessage());
+        if (films.containsValue(film)) {
+            log.warn("Failed to register film.");
+            throw new FailedRegistrationException("Film is already registered.");
         }
+        validateReleaseDate(film);
+
+        film.setId(generateId());
+        films.put(film.getId(), film);
+
+        log.debug("Film {} added.", film.getName());
+        return film;
     }
 
     @Override
     public Film updateFilm(Film film) {
-        try {
-            if (films.containsKey(film.getId())) {
-                validateReleaseDate(film);
-                films.put(film.getId(), film);
-                log.debug("Film {} data updated.", film.getName());
-                return film;
-            } else {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Film is not found.");
-            }
-        } catch (ResponseStatusException e) {
-            log.warn("Failed to update film: {}", e.getMessage());
-            throw new ResponseStatusException(e.getStatus(), e.getMessage());
+        if (films.containsKey(film.getId())) {
+            validateReleaseDate(film);
+            films.put(film.getId(), film);
+
+            log.debug("Film {} data updated.", film.getName());
+            return film;
+        } else {
+            log.warn("Failed to update film {}.", film.getName());
+            throw new NotFoundException("Film is not found.");
         }
     }
 
@@ -68,7 +64,7 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     private void validateReleaseDate(Film film) {
         if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Film release date must be after 28/12/1985.");
+            throw new ValidationException("Film release date must be after 28/12/1985.");
         }
     }
 }

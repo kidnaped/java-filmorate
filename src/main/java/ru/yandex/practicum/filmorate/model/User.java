@@ -21,5 +21,9 @@ public class User {
     private String name;
     @PastOrPresent
     private LocalDate birthday;
-    private Set<Long> friends;
+    private Set<Integer> friends;
+
+    public void addFriend(Integer id) {
+        friends.add(id);
+    }
 }

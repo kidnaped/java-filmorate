@@ -22,27 +22,27 @@ public class UserController {
 
     @PostMapping
     public User addUser(@Valid @RequestBody User user) {
-        return userService.getUserStorage().addUser(user);
+        return userService.getUserStorage().create(user);
     }
 
     @PutMapping
     public User updateUser(@Valid @RequestBody User user) {
-        return userService.getUserStorage().updateUser(user);
+        return userService.getUserStorage().update(user);
     }
 
     @GetMapping
     public List<User> getUsers() {
-        return userService.getUserStorage().getUsers();
+        return userService.getUserStorage().findAll();
     }
 
     @GetMapping("/{userId}")
     public User getById(@PathVariable Integer userId) {
-
+       return userService.getUserStorage().findById(userId);
     }
 
     @GetMapping("/{userId}/friends")
     public List<User> getFriendsByUserId(@PathVariable Integer userId) {
-
+        return userService.getUserStorage().findFriendsByUserId(userId);
     }
 
     @GetMapping("/{userId}/friends/common/{otherId}")
@@ -58,6 +58,7 @@ public class UserController {
             @PathVariable Integer userId,
             @PathVariable Integer friendId
     ){
+        userService.addToFriendList(userId, friendId);
         return Map.of(
                 "User", userId,
                 "Friend", friendId
