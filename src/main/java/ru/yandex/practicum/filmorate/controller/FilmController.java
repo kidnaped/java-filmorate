@@ -1,72 +1,70 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
-import java.time.LocalDate;
 import java.util.*;
 
 @RestController
 @RequestMapping("/films")
 @Slf4j
 public class FilmController {
-    private final SortedMap<Integer, Film> films = new TreeMap<>();
-    private int id = 0;
+    private final FilmService filmService;
+    @Autowired
+    public FilmController(FilmService filmService) {
+        this.filmService = filmService;
+    }
 
     @PostMapping
     public Film addFilm(@Valid @RequestBody Film film) {
-        try {
-            if (films.containsValue(film)) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Film is already registered.");
-            }
-            validateReleaseDate(film);
-            film.setId(generateId());
-            films.put(film.getId(), film);
-            log.debug("Film {} added.", film.getName());
-            return film;
-        } catch (ResponseStatusException e) {
-            log.warn("Failed to add film: {}", e.getMessage());
-            throw new ResponseStatusException(e.getStatus(), e.getMessage());
-        }
+        return filmService.getFilmStorage().addFilm(film);
     }
 
     @PutMapping
     public Film updateFilm(@Valid @RequestBody Film film) {
-        try {
-            if (films.containsKey(film.getId())) {
-                validateReleaseDate(film);
-                films.put(film.getId(), film);
-                log.debug("Film {} data updated.", film.getName());
-                return film;
-            } else {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Film is not found.");
-            }
-        } catch (ResponseStatusException e) {
-            log.warn("Failed to update film: {}", e.getMessage());
-            throw new ResponseStatusException(e.getStatus(), e.getMessage());
-        }
+        return filmService.getFilmStorage().updateFilm(film);
     }
 
     @GetMapping
     public List<Film> getFilms() {
-        return new ArrayList<>(films.values());
+        return filmService.getFilmStorage().getFilms();
     }
 
-    protected void clear() {
-        id = 0;
-        films.clear();
-    }
-    private int generateId() {
-        return ++id;
+    @GetMapping("/{filmId}")
+    public Film getById(@PathVariable Integer filmId) {
+
     }
 
-    private void validateReleaseDate(Film film) throws ResponseStatusException {
-        if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Film release date must be after 28/12/1985.");
-        }
+    @PutMapping("/{filmId}/like/{userId}")
+    public Map<String, Integer> addLikeFromUser(
+            @PathVariable Integer filmId,
+            @PathVariable Integer userId
+    ){
+        return Map.of(
+                "User", userId,
+                "Liked film", filmId
+        );
+    }
+
+    @DeleteMapping("/{filmId}/like/{userId}")
+    public Map<String, Integer> removeLikeFromUser(
+            @PathVariable Integer filmId,
+            @PathVariable Integer userId
+    ){
+        return Map.of(
+                "User", userId,
+                "Removed like from film", filmId
+        );
+    }
+
+    @GetMapping("/popular?count={size}")
+    public List<Film> findMostLikedFilms(@RequestParam(required = false, defaultValue = "10") Integer count,
+                                         @PathVariable Integer size
+    ){
+
     }
 }
