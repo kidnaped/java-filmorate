@@ -66,6 +66,11 @@ public class InMemoryUserStorage implements UserStorage {
         return userFriends;
     }
 
+    @Override
+    public List<Integer> getAllUsersId() {
+        return new ArrayList<>(users.keySet());
+    }
+
     protected void clear() {
         id = 0;
         users.clear();

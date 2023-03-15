@@ -26,4 +26,7 @@ public class User {
     public void addFriend(Integer id) {
         friends.add(id);
     }
+    public void removeFriend(Integer id) {
+        friends.remove(id);
+    }
 }

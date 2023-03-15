@@ -11,4 +11,6 @@ public interface UserStorage {
     User findById(Integer userId);
 
     List<User> findFriendsByUserId(Integer userId);
+
+    List<Integer> getAllUsersId();
 }

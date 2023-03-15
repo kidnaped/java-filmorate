@@ -50,7 +50,7 @@ public class UserController {
             @PathVariable Integer userId,
             @PathVariable Integer otherId
     ){
-
+        return userService.getCommonFriends(userId, otherId);
     }
 
     @PutMapping("/{userId}/friends/{friendId}")
@@ -58,11 +58,7 @@ public class UserController {
             @PathVariable Integer userId,
             @PathVariable Integer friendId
     ){
-        userService.addToFriendList(userId, friendId);
-        return Map.of(
-                "User", userId,
-                "Friend", friendId
-        );
+        return userService.addToFriendList(userId, friendId);
     }
 
     @DeleteMapping("/{userId}/friends/{friendId}")
@@ -70,9 +66,6 @@ public class UserController {
             @PathVariable Integer userId,
             @PathVariable Integer friendId
     ){
-        return Map.of(
-                "User", userId,
-                "Friend", friendId
-        );
+        return userService.removeFromFriendList(userId, friendId);
     }
 }
