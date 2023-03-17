@@ -29,4 +29,8 @@ public class User {
     public void removeFriend(Integer id) {
         friends.remove(id);
     }
+
+    public Set<Integer> getFriends() {
+        return friends;
+    }
 }

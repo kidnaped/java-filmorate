@@ -7,6 +7,8 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
 import java.util.*;
 
 @RestController
@@ -21,50 +23,52 @@ public class UserController {
     }
 
     @PostMapping
-    public User addUser(@Valid @RequestBody User user) {
-        return userService.getUserStorage().create(user);
+    public User create(@Valid @RequestBody User user) {
+        return userService.createUser(user);
     }
 
     @PutMapping
-    public User updateUser(@Valid @RequestBody User user) {
-        return userService.getUserStorage().update(user);
+    public User update(@Valid @RequestBody User user) {
+        return userService.updateUser(user);
     }
 
     @GetMapping
     public List<User> getUsers() {
-        return userService.getUserStorage().findAll();
+        return userService.getAllUsers();
     }
 
     @GetMapping("/{userId}")
-    public User getById(@PathVariable Integer userId) {
-       return userService.getUserStorage().findById(userId);
+    public User getById(@PathVariable(required = false)
+                            @NotNull @Positive Integer userId) {
+       return userService.findById(userId);
     }
 
     @GetMapping("/{userId}/friends")
-    public List<User> getFriendsByUserId(@PathVariable Integer userId) {
-        return userService.getUserStorage().findFriendsByUserId(userId);
+    public List<User> getFriendsByUserId(@PathVariable
+                                             @NotNull @Positive Integer userId) {
+        return userService.findFriendsByUserId(userId);
     }
 
     @GetMapping("/{userId}/friends/common/{otherId}")
     public List<User> getCommonFriendsBetweenUsers(
-            @PathVariable Integer userId,
-            @PathVariable Integer otherId
+            @PathVariable @NotNull @Positive Integer userId,
+            @PathVariable  @NotNull @Positive Integer otherId
     ){
         return userService.getCommonFriends(userId, otherId);
     }
 
     @PutMapping("/{userId}/friends/{friendId}")
     public Map<String, Integer> addFriend(
-            @PathVariable Integer userId,
-            @PathVariable Integer friendId
+            @PathVariable @NotNull @Positive Integer userId,
+            @PathVariable @NotNull @Positive Integer friendId
     ){
         return userService.addToFriendList(userId, friendId);
     }
 
     @DeleteMapping("/{userId}/friends/{friendId}")
     public Map<String, Integer> removeFriend(
-            @PathVariable Integer userId,
-            @PathVariable Integer friendId
+            @PathVariable @NotNull @Positive Integer userId,
+            @PathVariable @NotNull @Positive Integer friendId
     ){
         return userService.removeFromFriendList(userId, friendId);
     }

@@ -51,19 +51,61 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User findById(Integer userId) {
-        userRegistrationValidation(userId);
         return users.get(userId);
     }
 
     @Override
     public List<User> findFriendsByUserId(Integer userId) {
-        userRegistrationValidation(userId);
+        getValidUserByIdOrThrow(userId);
         List<Integer> friendsId = new ArrayList<>(users.get(userId).getFriends());
         List<User> userFriends = new ArrayList<>();
 
         friendsId.forEach(id -> userFriends.add(users.get(id)));
 
         return userFriends;
+    }
+
+    @Override
+    public Map<String, Integer> addToFriendList(Integer userId, Integer friendId) {
+        User user = getValidUserByIdOrThrow(userId);
+        User friend = getValidUserByIdOrThrow(friendId);
+
+        user.addFriend(friendId);
+        friend.addFriend(userId);
+
+        return Map.of(
+                "User", userId,
+                "Friend added", friendId
+        );
+    }
+
+    @Override
+    public Map<String, Integer> removeFromFriendList(Integer userId, Integer friendId) {
+        User user = getValidUserByIdOrThrow(userId);
+        User friend = getValidUserByIdOrThrow(friendId);
+
+        user.removeFriend(friendId);
+        friend.removeFriend(userId);
+
+        return Map.of(
+                "User", userId,
+                "Friend added", friendId
+        );
+    }
+
+    @Override
+    public List<User> findCommonFriendsById(Integer userId, Integer otherId) {
+        Set<Integer> userFriends = getValidUserByIdOrThrow(userId).getFriends();
+        Set<Integer> otherUserFriends = getValidUserByIdOrThrow(otherId).getFriends();
+        List<User> commonFriends = new ArrayList<>();
+
+        userFriends.retainAll(otherUserFriends);
+
+        for(Integer i : userFriends) {
+            commonFriends.add(users.get(i));
+        }
+
+        return commonFriends;
     }
 
     @Override
@@ -86,12 +128,16 @@ public class InMemoryUserStorage implements UserStorage {
         }
     }
 
-    private void userRegistrationValidation(Integer userId) {
+    private User getValidUserByIdOrThrow(Integer userId) {
         if (userId == null || userId <= 0) {
             throw new ValidationException("ID can not be negative or null");
         }
-        if (!users.containsKey(userId)) {
+
+        User user = users.get(userId);
+
+        if (user == null) {
             throw new NotFoundException("User with given ID is not found.");
         }
+        return user;
     }
 }
