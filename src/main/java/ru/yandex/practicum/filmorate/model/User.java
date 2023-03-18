@@ -2,16 +2,19 @@ package ru.yandex.practicum.filmorate.model;
 
 import lombok.Builder;
 import lombok.Data;
+import lombok.NonNull;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 @Data
 @Builder
 public class User {
     @PositiveOrZero
-    private int id;
+    private Integer id;
     @NotBlank
     @Email
     private String email;
@@ -21,6 +24,7 @@ public class User {
     private String name;
     @PastOrPresent
     private LocalDate birthday;
+    @NonNull
     private Set<Integer> friends;
 
     public void addFriend(Integer id) {
@@ -30,7 +34,7 @@ public class User {
         friends.remove(id);
     }
 
-    public Set<Integer> getFriends() {
-        return friends;
+    public List<Integer> getFriends() {
+        return new ArrayList<>(friends);
     }
 }

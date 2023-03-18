@@ -2,16 +2,19 @@ package ru.yandex.practicum.filmorate.model;
 
 import lombok.Builder;
 import lombok.Data;
+import lombok.NonNull;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 @Data
 @Builder
 public class Film {
     @PositiveOrZero
-    private int id;
+    private Integer id;
     @NotBlank
     private String name;
     @NotBlank
@@ -22,5 +25,18 @@ public class Film {
     @NotNull
     @Positive
     private double duration;
-    private Set<Long> likes;
+    @NonNull
+    private Set<Integer> likes;
+
+    public void addLike(Integer userId) {
+        likes.add(userId);
+    }
+
+    public void removeLike(Integer userId) {
+        likes.remove(userId);
+    }
+
+    public List<Integer> getLikes() {
+        return new ArrayList<>(likes);
+    }
 }

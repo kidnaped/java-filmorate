@@ -8,6 +8,6 @@ public interface FilmStorage {
     Film addFilm(Film film);
     Film updateFilm(Film film);
     List<Film> getFilms();
-
     Film findFilmById(Integer filmId);
+    boolean filmExists(Integer id);
 }

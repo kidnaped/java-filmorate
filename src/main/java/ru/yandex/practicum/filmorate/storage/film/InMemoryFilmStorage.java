@@ -21,12 +21,6 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public Film addFilm(Film film) {
-        if (films.containsValue(film)) {
-            log.warn("Failed to register film.");
-            throw new FailedRegistrationException("Film is already registered.");
-        }
-        validateReleaseDate(film);
-
         film.setId(generateId());
         films.put(film.getId(), film);
 
@@ -36,8 +30,6 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public Film updateFilm(Film film) {
-        getValidFilmOrThrow(film.getId());
-        validateReleaseDate(film);
         films.put(film.getId(), film);
 
         log.debug("Film {} data updated.", film.getName());
@@ -51,8 +43,12 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public Film findFilmById(Integer filmId) {
-        getValidFilmOrThrow(filmId);
         return films.get(filmId);
+    }
+
+    @Override
+    public boolean filmExists(Integer filmId) {
+        return films.containsKey(filmId);
     }
 
 
@@ -63,25 +59,5 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     private int generateId() {
         return ++id;
-    }
-
-    private void validateReleaseDate(Film film) {
-        if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
-            log.warn("Failed to validate release date.");
-            throw new ValidationException("Film release date must be after 28/12/1985.");
-        }
-    }
-
-    private Film getValidFilmOrThrow(Integer id) {
-        if (id == null || id <= 0) {
-            log.warn("Film ID is null or negative.");
-            throw new ValidationException("ID can not be negative or null");
-        }
-        Film film = films.get(id);
-        if (film == null) {
-            log.warn("Film is not registered.");
-            throw new NotFoundException("Film with given ID is not found");
-        }
-        return film;
     }
 }
