@@ -7,6 +7,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -18,6 +19,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 
 @WebMvcTest
+@ComponentScan(basePackages = "ru.yandex.practicum.filmorate")
 class UserControllerTest {
     @Autowired
     private MockMvc mockMvc;
@@ -70,7 +72,6 @@ class UserControllerTest {
 
     @AfterEach
     public void tearDown() {
-        userController.clear();
     }
 
     // POST tests

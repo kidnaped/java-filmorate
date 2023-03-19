@@ -8,6 +8,7 @@ import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import java.util.ArrayList;
@@ -28,8 +29,8 @@ public class UserService {
 
     public User createUser(User user) {
         if (userStorage.userExists(user.getId())) {
-           log.warn("Failed to add new user: {}", user.getName());
-           throw new FailedRegistrationException("User is already registered.");
+            log.warn("Failed to add new user: {}", user.getName());
+            throw new FailedRegistrationException("User is already registered.");
         }
         setDefaultNameIfEmpty(user);
 
@@ -46,7 +47,7 @@ public class UserService {
     }
 
     public User findById(@NotNull @Positive Integer userId) {
-        return userStorage.findById(userId);
+        return getUserOrThrow(userId);
     }
 
     public List<User> getAllUsers() {
@@ -65,16 +66,16 @@ public class UserService {
 
     // addToFriendList
     public Map<String, Integer> makeFriends(
-            @NotNull @Positive Integer userId,
-            @NotNull @Positive Integer friendId
+            @Valid @NotNull @Positive Integer userId,
+            @Valid @NotNull @Positive Integer friendId
     ) {
         User user = getUserOrThrow(userId);
         User friend = getUserOrThrow(friendId);
 
-        user.addFriend(friend.getId());
-        friend.addFriend(user.getId());
-
+        user.addFriend(friendId);
         userStorage.update(user);
+
+        friend.addFriend(userId);
         userStorage.update(friend);
 
         return Map.of(
@@ -92,9 +93,9 @@ public class UserService {
         User friend = getUserOrThrow(friendId);
 
         user.removeFriend(friend.getId());
-        friend.removeFriend(user.getId());
-
         userStorage.update(user);
+
+        friend.removeFriend(user.getId());
         userStorage.update(friend);
 
         return Map.of(
@@ -111,13 +112,13 @@ public class UserService {
         User user = getUserOrThrow(userId);
         User otherUser = getUserOrThrow(otherId);
 
-        List<Integer> userFriends = user.getFriends();
-        List<Integer> otherUserFriends = otherUser.getFriends();
+        Set<Integer> userFriends = user.getFriends();
+        Set<Integer> otherUserFriends = otherUser.getFriends();
 
         userFriends.retainAll(otherUserFriends);
 
         return userFriends.stream()
-                .map(id -> userStorage.findAll().get(id))
+                .map(userStorage::findById)
                 .collect(Collectors.toList());
     }
 
@@ -135,4 +136,9 @@ public class UserService {
             user.setName(user.getLogin());
         }
     }
+
+    protected void clear() {
+        userStorage.clear();
+    }
 }
+

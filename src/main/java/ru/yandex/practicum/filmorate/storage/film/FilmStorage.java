@@ -10,4 +10,6 @@ public interface FilmStorage {
     List<Film> getFilms();
     Film findFilmById(Integer filmId);
     boolean filmExists(Integer id);
+
+    void clear();
 }

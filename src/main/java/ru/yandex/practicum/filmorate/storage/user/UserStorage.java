@@ -10,4 +10,6 @@ public interface UserStorage {
     List<User> findAll();
     User findById(Integer userId);
     boolean userExists(Integer id);
+
+    void clear();
 }

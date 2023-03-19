@@ -34,6 +34,7 @@ public class FilmService {
             throw new FailedRegistrationException("Film is already registered.");
         }
         validateReleaseDate(film);
+
         return filmStorage.addFilm(film);
     }
 
@@ -85,9 +86,7 @@ public class FilmService {
     }
 
     public List<Film> getMostLikedFilms(@NotNull @Positive Integer count) {
-        List<Film> allFilms = filmStorage.getFilms();
-
-        return allFilms.stream()
+        return filmStorage.getFilms().stream()
                 .sorted(Comparator.comparingInt(f -> f.getLikes().size()))
                 .limit(count)
                 .collect(Collectors.toList());
@@ -114,5 +113,10 @@ public class FilmService {
             log.warn("Failed to validate release date.");
             throw new ValidationException("Film release date must be after 28/12/1985.");
         }
+    }
+
+    protected void clear() {
+        filmStorage.clear();
+        userStorage.clear();
     }
 }

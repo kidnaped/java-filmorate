@@ -7,6 +7,7 @@ import lombok.NonNull;
 import javax.validation.constraints.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -14,7 +15,7 @@ import java.util.Set;
 @Builder
 public class Film {
     @PositiveOrZero
-    private Integer id;
+    private int id;
     @NotBlank
     private String name;
     @NotBlank
@@ -25,8 +26,7 @@ public class Film {
     @NotNull
     @Positive
     private double duration;
-    @NonNull
-    private Set<Integer> likes;
+    private final Set<Integer> likes = new HashSet<>();
 
     public void addLike(Integer userId) {
         likes.add(userId);
@@ -36,7 +36,7 @@ public class Film {
         likes.remove(userId);
     }
 
-    public List<Integer> getLikes() {
-        return new ArrayList<>(likes);
+    public Set<Integer> getLikes() {
+        return likes;
     }
 }

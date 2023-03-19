@@ -31,6 +31,7 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public List<User> findAll() {
+        log.debug("List of users is sent.");
         return new ArrayList<>(users.values());
     }
 
@@ -44,7 +45,8 @@ public class InMemoryUserStorage implements UserStorage {
         return users.containsKey(id);
     }
 
-    protected void clear() {
+    @Override
+    public void clear() {
         id = 0;
         users.clear();
     }
