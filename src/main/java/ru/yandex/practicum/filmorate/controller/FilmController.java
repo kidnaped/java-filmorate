@@ -58,5 +58,9 @@ public class FilmController {
     public List<Film> findMostLikedFilms(@RequestParam(required = false, defaultValue = "10") Integer count){
         return filmService.getMostLikedFilms(count);
     }
+
+    protected void clear() {
+        filmService.clear();
+    }
 }
 

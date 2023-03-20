@@ -17,10 +17,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-
 @WebMvcTest
 @ComponentScan(basePackages = "ru.yandex.practicum.filmorate")
 class UserControllerTest {
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
     private MockMvc mockMvc;
 
@@ -72,6 +72,7 @@ class UserControllerTest {
 
     @AfterEach
     public void tearDown() {
+        userController.clear();
     }
 
     // POST tests

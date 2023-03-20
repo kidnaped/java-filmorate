@@ -66,4 +66,8 @@ public class UserController {
     ){
         return userService.stopBeingFriends(userId, friendId);
     }
+
+    protected void clear() {
+        userService.clear();
+    }
 }

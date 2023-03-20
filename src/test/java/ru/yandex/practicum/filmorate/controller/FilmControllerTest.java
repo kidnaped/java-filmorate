@@ -20,11 +20,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest
 @ComponentScan(basePackages = "ru.yandex.practicum.filmorate")
 class FilmControllerTest {
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
     private MockMvc mockMvc;
     @Autowired
     private FilmController filmController;
-
     @Autowired
     private WebApplicationContext webApplicationContext;
 
@@ -77,6 +77,7 @@ class FilmControllerTest {
 
     @AfterEach
     public void tearDown() {
+        filmController.clear();
     }
 
     // POST tests
@@ -103,7 +104,7 @@ class FilmControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(result -> Assertions.assertTrue(result.getResolvedException()
                         .getMessage()
-                        .contains("must not be empty")));
+                        .contains("must not be blank")));
     }
 
     @Test

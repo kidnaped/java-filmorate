@@ -8,9 +8,6 @@ import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Positive;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -46,7 +43,7 @@ public class UserService {
         return userStorage.update(user);
     }
 
-    public User findById(@NotNull @Positive Integer userId) {
+    public User findById(Integer userId) {
         return getUserOrThrow(userId);
     }
 
@@ -54,7 +51,7 @@ public class UserService {
         return userStorage.findAll();
     }
 
-    public List<User> findFriendsByUserId(@NotNull @Positive Integer userId) {
+    public List<User> findFriendsByUserId(Integer userId) {
         User user = getUserOrThrow(userId);
         List<Integer> friendsId = new ArrayList<>(user.getFriends());
         List<User> userFriends = new ArrayList<>();
@@ -65,10 +62,7 @@ public class UserService {
     }
 
     // addToFriendList
-    public Map<String, Integer> makeFriends(
-            @Valid @NotNull @Positive Integer userId,
-            @Valid @NotNull @Positive Integer friendId
-    ) {
+    public Map<String, Integer> makeFriends(Integer userId, Integer friendId) {
         User user = getUserOrThrow(userId);
         User friend = getUserOrThrow(friendId);
 
@@ -85,10 +79,7 @@ public class UserService {
     }
 
     // removeFromFriendList
-    public Map<String, Integer> stopBeingFriends(
-            @NotNull @Positive Integer userId,
-            @NotNull @Positive Integer friendId
-    ) {
+    public Map<String, Integer> stopBeingFriends(Integer userId, Integer friendId) {
         User user = getUserOrThrow(userId);
         User friend = getUserOrThrow(friendId);
 
@@ -105,19 +96,17 @@ public class UserService {
     }
 
     // getCommonFriends
-    public List<User> getCommonFriends(
-            @NotNull @Positive Integer userId,
-            @NotNull @Positive Integer otherId
-    ) {
+    public List<User> getCommonFriends(Integer userId, Integer otherId) {
         User user = getUserOrThrow(userId);
         User otherUser = getUserOrThrow(otherId);
 
         Set<Integer> userFriends = user.getFriends();
         Set<Integer> otherUserFriends = otherUser.getFriends();
 
-        userFriends.retainAll(otherUserFriends);
+        List<Integer> common = new ArrayList<>(userFriends);
+        common.retainAll(otherUserFriends);
 
-        return userFriends.stream()
+        return common.stream()
                 .map(userStorage::findById)
                 .collect(Collectors.toList());
     }
@@ -137,7 +126,7 @@ public class UserService {
         }
     }
 
-    protected void clear() {
+    public void clear() {
         userStorage.clear();
     }
 }

@@ -8,12 +8,8 @@ import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Positive;
 import java.time.LocalDate;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -47,7 +43,7 @@ public class FilmService {
         return filmStorage.updateFilm(film);
     }
 
-    public Film getFilmById(@NotNull @Positive Integer filmId) {
+    public Film getFilmById(Integer filmId) {
        return getFilmOrThrow(filmId);
     }
 
@@ -55,9 +51,7 @@ public class FilmService {
         return filmStorage.getFilms();
     }
 
-    public Map<String, Integer> addLike(
-            @NotNull @Positive Integer filmId,
-            @NotNull @Positive Integer userId) {
+    public Map<String, Integer> addLike(Integer filmId, Integer userId) {
         Film film = getFilmOrThrow(filmId);
         User user = getUserOrThrow(userId);
 
@@ -70,9 +64,7 @@ public class FilmService {
         );
     }
 
-    public Map<String, Integer> removeLike(
-            @NotNull @Positive Integer filmId,
-            @NotNull @Positive Integer userId) {
+    public Map<String, Integer> removeLike(Integer filmId, Integer userId) {
         Film film = getFilmOrThrow(filmId);
         User user = getUserOrThrow(userId);
 
@@ -85,9 +77,11 @@ public class FilmService {
         );
     }
 
-    public List<Film> getMostLikedFilms(@NotNull @Positive Integer count) {
-        return filmStorage.getFilms().stream()
-                .sorted(Comparator.comparingInt(f -> f.getLikes().size()))
+    public List<Film> getMostLikedFilms(Integer count) {
+        List<Film> films = new ArrayList<>(filmStorage.getFilms());
+
+        return films.stream()
+                .sorted((f1, f2) -> Integer.compare(f2.getLikes().size(), f1.getLikes().size()))
                 .limit(count)
                 .collect(Collectors.toList());
     }
@@ -115,7 +109,7 @@ public class FilmService {
         }
     }
 
-    protected void clear() {
+    public void clear() {
         filmStorage.clear();
         userStorage.clear();
     }
