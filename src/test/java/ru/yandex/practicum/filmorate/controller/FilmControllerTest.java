@@ -7,6 +7,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -17,13 +18,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest
+@ComponentScan(basePackages = "ru.yandex.practicum.filmorate")
 class FilmControllerTest {
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
     private MockMvc mockMvc;
-
     @Autowired
     private FilmController filmController;
-
     @Autowired
     private WebApplicationContext webApplicationContext;
 
@@ -103,7 +104,7 @@ class FilmControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(result -> Assertions.assertTrue(result.getResolvedException()
                         .getMessage()
-                        .contains("must not be empty")));
+                        .contains("must not be blank")));
     }
 
     @Test
@@ -141,8 +142,6 @@ class FilmControllerTest {
                         .getMessage()
                         .contains("must be greater than 0")));
     }
-
-
 
     // PUT tests
     // valid film
