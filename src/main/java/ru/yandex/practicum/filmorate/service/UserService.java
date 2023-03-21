@@ -10,7 +10,6 @@ import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -62,7 +61,7 @@ public class UserService {
     }
 
     // addToFriendList
-    public Map<String, Integer> makeFriends(Integer userId, Integer friendId) {
+    public String makeFriends(Integer userId, Integer friendId) {
         User user = getUserOrThrow(userId);
         User friend = getUserOrThrow(friendId);
 
@@ -72,14 +71,11 @@ public class UserService {
         friend.addFriend(userId);
         userStorage.update(friend);
 
-        return Map.of(
-                "User", userId,
-                "Friend added", friendId
-        );
+        return String.format("%s and %s are friends.", user.getName(), friend.getName());
     }
 
     // removeFromFriendList
-    public Map<String, Integer> stopBeingFriends(Integer userId, Integer friendId) {
+    public String stopBeingFriends(Integer userId, Integer friendId) {
         User user = getUserOrThrow(userId);
         User friend = getUserOrThrow(friendId);
 
@@ -89,10 +85,7 @@ public class UserService {
         friend.removeFriend(user.getId());
         userStorage.update(friend);
 
-        return Map.of(
-                "User", userId,
-                "Friend deleted", friendId
-        );
+        return String.format("%s and %s are not friends.", user.getName(), friend.getName());
     }
 
     // getCommonFriends

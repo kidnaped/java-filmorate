@@ -1,22 +1,18 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
 import java.util.List;
-import java.util.Map;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/films")
 public class FilmController {
     private final FilmService filmService;
-    @Autowired
-    public FilmController(FilmService filmService) {
-        this.filmService = filmService;
-    }
 
     @PostMapping
     public Film addFilm(@Valid @RequestBody Film film) {
@@ -39,7 +35,7 @@ public class FilmController {
     }
 
     @PutMapping("/{filmId}/like/{userId}")
-    public Map<String, Integer> addLikeFromUser(
+    public String addLikeFromUser(
             @PathVariable Integer filmId,
             @PathVariable Integer userId
     ){
@@ -47,7 +43,7 @@ public class FilmController {
     }
 
     @DeleteMapping("/{filmId}/like/{userId}")
-    public Map<String, Integer> removeLikeFromUser(
+    public String removeLikeFromUser(
             @PathVariable Integer filmId,
             @PathVariable Integer userId
     ){
@@ -55,7 +51,7 @@ public class FilmController {
     }
 
     @GetMapping("/popular")
-    public List<Film> findMostLikedFilms(@RequestParam(required = false, defaultValue = "10") Integer count){
+    public List<Film> findMostLikedFilms(@RequestParam(defaultValue = "10") Integer count) {
         return filmService.getMostLikedFilms(count);
     }
 

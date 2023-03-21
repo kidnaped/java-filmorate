@@ -51,30 +51,24 @@ public class FilmService {
         return filmStorage.getFilms();
     }
 
-    public Map<String, Integer> addLike(Integer filmId, Integer userId) {
+    public String addLike(Integer filmId, Integer userId) {
         Film film = getFilmOrThrow(filmId);
         User user = getUserOrThrow(userId);
 
         film.addLike(user.getId());
         filmStorage.updateFilm(film);
 
-        return Map.of(
-                "Film", film.getId(),
-                "Liked by User", user.getId()
-        );
+        return String.format("Film %s: %d likes", film.getName(), film.getLikes().size());
     }
 
-    public Map<String, Integer> removeLike(Integer filmId, Integer userId) {
+    public String removeLike(Integer filmId, Integer userId) {
         Film film = getFilmOrThrow(filmId);
         User user = getUserOrThrow(userId);
 
         film.removeLike(user.getId());
         filmStorage.updateFilm(film);
 
-        return Map.of(
-                "Film", film.getId(),
-                "Like removed by User", user.getId()
-        );
+        return String.format("Film %s: %d likes", film.getName(), film.getLikes().size());
     }
 
     public List<Film> getMostLikedFilms(Integer count) {
