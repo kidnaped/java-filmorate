@@ -10,7 +10,6 @@ import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -25,20 +24,12 @@ public class FilmService {
     }
 
     public Film addFilm(Film film) {
-        if (filmStorage.filmExists(film.getId())) {
-            log.warn("Failed to register film.");
-            throw new FailedRegistrationException("Film is already registered.");
-        }
         validateReleaseDate(film);
-
         return filmStorage.addFilm(film);
     }
 
     public Film updateFilm(Film film) {
-        if (!filmStorage.filmExists(film.getId())) {
-            log.warn("Failed to update film data: {}", film.getName());
-            throw new NotFoundException("Film is not found.");
-        }
+        getFilmOrThrow(film.getId());
         validateReleaseDate(film);
         return filmStorage.updateFilm(film);
     }
@@ -55,8 +46,7 @@ public class FilmService {
         Film film = getFilmOrThrow(filmId);
         User user = getUserOrThrow(userId);
 
-        film.addLike(user.getId());
-        filmStorage.updateFilm(film);
+        filmStorage.addLike(film.getId(), user.getId());
 
         return String.format("Film %s: %d likes", film.getName(), film.getLikes().size());
     }
@@ -65,24 +55,19 @@ public class FilmService {
         Film film = getFilmOrThrow(filmId);
         User user = getUserOrThrow(userId);
 
-        film.removeLike(user.getId());
-        filmStorage.updateFilm(film);
+        filmStorage.deleteLike(film.getId(), user.getId());
 
         return String.format("Film %s: %d likes", film.getName(), film.getLikes().size());
     }
 
-    public List<Film> getMostLikedFilms(Integer count) {
-        List<Film> films = new ArrayList<>(filmStorage.getFilms());
-
-        return films.stream()
-                .sorted((f1, f2) -> Integer.compare(f2.getLikes().size(), f1.getLikes().size()))
-                .limit(count)
-                .collect(Collectors.toList());
+    public List<Film> getPopularFilms(Integer count) {
+        return filmStorage.getMostLikedFilms(count);
     }
 
     private Film getFilmOrThrow(Integer filmId) {
         Film film = filmStorage.findFilmById(filmId);
         if (film == null) {
+            log.warn("Failed to validate film.");
             throw new NotFoundException("Film with given ID is not found.");
         }
         return film;

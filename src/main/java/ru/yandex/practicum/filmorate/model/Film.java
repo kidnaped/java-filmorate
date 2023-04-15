@@ -22,18 +22,37 @@ public class Film {
     private LocalDate releaseDate;
     @NotNull
     @Positive
-    private double duration;
-    private final Set<Integer> likes = new HashSet<>();
+    private Integer duration;
+    @NotNull
+    private Mpa mpa;
+    private Set<Genre> genres = new HashSet<>();
+    private Set<Integer> likes = new HashSet<>();
 
-    public void addLike(Integer userId) {
-        likes.add(userId);
+    public Film(int id,
+                String name,
+                String description,
+                LocalDate releaseDate,
+                Integer duration,
+                Mpa mpa
+    ){
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.releaseDate = releaseDate;
+        this.duration = duration;
+        this.mpa = mpa;
     }
 
-    public void removeLike(Integer userId) {
-        likes.remove(userId);
-    }
-
-    public Set<Integer> getLikes() {
-        return likes;
+    public Film(String name,
+                String description,
+                LocalDate releaseDate,
+                Integer duration,
+                Mpa mpa
+    ){
+        this.name = name;
+        this.description = description;
+        this.releaseDate = releaseDate;
+        this.duration = duration;
+        this.mpa = mpa;
     }
 }

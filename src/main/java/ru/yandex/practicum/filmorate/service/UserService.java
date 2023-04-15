@@ -3,15 +3,12 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.FailedRegistrationException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -24,21 +21,12 @@ public class UserService {
     }
 
     public User createUser(User user) {
-        if (userStorage.userExists(user.getId())) {
-            log.warn("Failed to add new user: {}", user.getName());
-            throw new FailedRegistrationException("User is already registered.");
-        }
-        setDefaultNameIfEmpty(user);
-
+        getUserOrThrow(user.getId());
         return userStorage.create(user);
     }
 
     public User updateUser(User user) {
-        if (!userStorage.userExists(user.getId())) {
-            log.warn("Failed to update user's data: {}", user.getName());
-            throw new NotFoundException("User is not found.");
-        }
-        setDefaultNameIfEmpty(user);
+        getUserOrThrow(user.getId());
         return userStorage.update(user);
     }
 
@@ -52,12 +40,7 @@ public class UserService {
 
     public List<User> findFriendsByUserId(Integer userId) {
         User user = getUserOrThrow(userId);
-        List<Integer> friendsId = new ArrayList<>(user.getFriends());
-        List<User> userFriends = new ArrayList<>();
-
-        friendsId.forEach(id -> userFriends.add(userStorage.findById(id)));
-
-        return userFriends;
+        return new ArrayList<>(userStorage.findUserFriends(user.getId()));
     }
 
     // addToFriendList
@@ -65,11 +48,7 @@ public class UserService {
         User user = getUserOrThrow(userId);
         User friend = getUserOrThrow(friendId);
 
-        user.addFriend(friendId);
-        userStorage.update(user);
-
-        friend.addFriend(userId);
-        userStorage.update(friend);
+        userStorage.addFriend(user.getId(), friend.getId());
 
         return String.format("%s and %s are friends.", user.getName(), friend.getName());
     }
@@ -79,11 +58,7 @@ public class UserService {
         User user = getUserOrThrow(userId);
         User friend = getUserOrThrow(friendId);
 
-        user.removeFriend(friend.getId());
-        userStorage.update(user);
-
-        friend.removeFriend(user.getId());
-        userStorage.update(friend);
+        userStorage.deleteFriend(user.getId(), friend.getId());
 
         return String.format("%s and %s are not friends.", user.getName(), friend.getName());
     }
@@ -93,15 +68,7 @@ public class UserService {
         User user = getUserOrThrow(userId);
         User otherUser = getUserOrThrow(otherId);
 
-        Set<Integer> userFriends = user.getFriends();
-        Set<Integer> otherUserFriends = otherUser.getFriends();
-
-        List<Integer> common = new ArrayList<>(userFriends);
-        common.retainAll(otherUserFriends);
-
-        return common.stream()
-                .map(userStorage::findById)
-                .collect(Collectors.toList());
+        return new ArrayList<>(userStorage.findCommonFriends(user.getId(), otherUser.getId()));
     }
 
     private User getUserOrThrow(Integer userId) {
@@ -111,12 +78,6 @@ public class UserService {
             throw new NotFoundException("User with given ID is not found.");
         }
         return user;
-    }
-
-    private void setDefaultNameIfEmpty(User user) {
-        if (user.getName() == null || user.getName().isBlank() || user.getName().isEmpty()) {
-            user.setName(user.getLogin());
-        }
     }
 
     public void clear() {

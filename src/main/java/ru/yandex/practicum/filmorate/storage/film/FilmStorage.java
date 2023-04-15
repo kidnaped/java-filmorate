@@ -9,7 +9,8 @@ public interface FilmStorage {
     Film updateFilm(Film film);
     List<Film> getFilms();
     Film findFilmById(Integer filmId);
-    boolean filmExists(Integer id);
-
+    List<Film> getMostLikedFilms(Integer count);
+    String addLike(Integer filmId, Integer userId);
+    String deleteLike(Integer filmId, Integer userId);
     void clear();
 }

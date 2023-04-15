@@ -13,7 +13,6 @@ import java.util.List;
 @RequestMapping("/films")
 public class FilmController {
     private final FilmService filmService;
-
     @PostMapping
     public Film addFilm(@Valid @RequestBody Film film) {
         return filmService.addFilm(film);
@@ -52,7 +51,7 @@ public class FilmController {
 
     @GetMapping("/popular")
     public List<Film> findMostLikedFilms(@RequestParam(defaultValue = "10") Integer count) {
-        return filmService.getMostLikedFilms(count);
+        return filmService.getPopularFilms(count);
     }
 
     protected void clear() {

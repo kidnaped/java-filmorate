@@ -9,9 +9,11 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Data
+@Builder
 public class User {
+    @NotNull
     @PositiveOrZero
-    private int id;
+    private Integer id;
     @NotBlank
     @Email
     private String email;
@@ -21,7 +23,21 @@ public class User {
     private String name;
     @PastOrPresent
     private LocalDate birthday;
-    private final Set<Integer> friends = new HashSet<>();
+    private Set<Integer> friends;
+
+    public User(Integer id,
+                String email,
+                String login,
+                String name,
+                LocalDate birthday
+    ) {
+        this.friends = new HashSet<>();
+        this.id = id;
+        this.email = email;
+        this.login = login;
+        this.name = name == null ? login : name;
+        this.birthday = birthday;
+    }
 
     public void addFriend(Integer id) {
         friends.add(id);
@@ -29,7 +45,6 @@ public class User {
     public void removeFriend(Integer id) {
         friends.remove(id);
     }
-
     public Set<Integer> getFriends() {
         return friends;
     }
