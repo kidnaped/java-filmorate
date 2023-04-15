@@ -5,6 +5,7 @@ import lombok.Data;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -25,8 +26,8 @@ public class Film {
     private Integer duration;
     @NotNull
     private Mpa mpa;
-    private Set<Genre> genres = new HashSet<>();
-    private Set<Integer> likes = new HashSet<>();
+    private Set<Genre> genres;
+    private Set<Integer> likes;
 
     public Film(int id,
                 String name,
@@ -43,6 +44,25 @@ public class Film {
         this.mpa = mpa;
     }
 
+    public Film(int id,
+                String name,
+                String description,
+                LocalDate releaseDate,
+                Integer duration,
+                Mpa mpa,
+                Collection<Genre> genres,
+                Collection<Integer> likes
+    ){
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.releaseDate = releaseDate;
+        this.duration = duration;
+        this.mpa = mpa;
+        this.genres = new HashSet<>(genres);
+        this.likes = new HashSet<>(likes);
+    }
+
     public Film(String name,
                 String description,
                 LocalDate releaseDate,
@@ -54,5 +74,22 @@ public class Film {
         this.releaseDate = releaseDate;
         this.duration = duration;
         this.mpa = mpa;
+    }
+
+    public Film(String name,
+                String description,
+                LocalDate releaseDate,
+                Integer duration,
+                Mpa mpa,
+                Collection<Genre> genres,
+                Collection<Integer> likes
+    ){
+        this.name = name;
+        this.description = description;
+        this.releaseDate = releaseDate;
+        this.duration = duration;
+        this.mpa = mpa;
+        this.genres = new HashSet<>(genres);
+        this.likes = new HashSet<>(likes);
     }
 }
