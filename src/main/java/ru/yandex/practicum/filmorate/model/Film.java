@@ -1,16 +1,16 @@
 package ru.yandex.practicum.filmorate.model;
 
-import lombok.Builder;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 @Data
-@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Film {
     @PositiveOrZero
     private int id;
@@ -26,70 +26,18 @@ public class Film {
     private Integer duration;
     @NotNull
     private Mpa mpa;
-    private Set<Genre> genres;
-    private Set<Integer> likes;
+    private Set<Genre> genres = new HashSet<>();
+    private Set<Integer> likes = new HashSet<>();
 
-    public Film(int id,
-                String name,
-                String description,
-                LocalDate releaseDate,
-                Integer duration,
-                Mpa mpa
-    ){
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        this.releaseDate = releaseDate;
-        this.duration = duration;
-        this.mpa = mpa;
-    }
-
-    public Film(int id,
-                String name,
-                String description,
-                LocalDate releaseDate,
-                Integer duration,
-                Mpa mpa,
-                Collection<Genre> genres,
-                Collection<Integer> likes
-    ){
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        this.releaseDate = releaseDate;
-        this.duration = duration;
-        this.mpa = mpa;
-        this.genres = new HashSet<>(genres);
-        this.likes = new HashSet<>(likes);
-    }
-
-    public Film(String name,
-                String description,
-                LocalDate releaseDate,
-                Integer duration,
-                Mpa mpa
-    ){
-        this.name = name;
-        this.description = description;
-        this.releaseDate = releaseDate;
-        this.duration = duration;
-        this.mpa = mpa;
-    }
-
-    public Film(String name,
-                String description,
-                LocalDate releaseDate,
-                Integer duration,
-                Mpa mpa,
-                Collection<Genre> genres,
-                Collection<Integer> likes
-    ){
-        this.name = name;
-        this.description = description;
-        this.releaseDate = releaseDate;
-        this.duration = duration;
-        this.mpa = mpa;
-        this.genres = new HashSet<>(genres);
-        this.likes = new HashSet<>(likes);
+    public Map<String, Object> toMap() {
+        Map<String, Object> map = new HashMap<>();
+        map.put("FILM_NAME", name);
+        map.put("DESCRIPTION", description);
+        map.put("RELEASE_DATE", releaseDate);
+        map.put("DURATION", duration);
+        if (mpa != null) {
+            map.put("MPA", mpa);
+        }
+        return map;
     }
 }

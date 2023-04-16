@@ -40,7 +40,7 @@ public class UserController {
     }
 
     @GetMapping("/{userId}/friends/common/{otherId}")
-    public List<User> getCommonFriendsBetweenUsers(
+    public List<User> getCommonFriends(
             @PathVariable Integer userId,
             @PathVariable Integer otherId
     ){
@@ -61,9 +61,5 @@ public class UserController {
             @PathVariable Integer friendId
     ){
         return userService.stopBeingFriends(userId, friendId);
-    }
-
-    protected void clear() {
-        userService.clear();
     }
 }

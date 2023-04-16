@@ -9,6 +9,8 @@ import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -21,7 +23,6 @@ public class UserService {
     }
 
     public User createUser(User user) {
-        getUserOrThrow(user.getId());
         return userStorage.create(user);
     }
 
@@ -40,7 +41,11 @@ public class UserService {
 
     public List<User> findFriendsByUserId(Integer userId) {
         User user = getUserOrThrow(userId);
-        return new ArrayList<>(userStorage.findUserFriends(user.getId()));
+        List<Integer> friendsId = new ArrayList<>(user.getFriends());
+        List<User> userFriends = new ArrayList<>();
+
+        friendsId.forEach(id -> userFriends.add(getUserOrThrow(id)));
+        return userFriends;
     }
 
     // addToFriendList
@@ -50,7 +55,7 @@ public class UserService {
 
         userStorage.addFriend(user.getId(), friend.getId());
 
-        return String.format("%s and %s are friends.", user.getName(), friend.getName());
+        return String.format("%s added %s in a friends list.", user.getName(), friend.getName());
     }
 
     // removeFromFriendList
@@ -60,7 +65,7 @@ public class UserService {
 
         userStorage.deleteFriend(user.getId(), friend.getId());
 
-        return String.format("%s and %s are not friends.", user.getName(), friend.getName());
+        return String.format("%s removed %s from a friends list.", user.getName(), friend.getName());
     }
 
     // getCommonFriends
@@ -68,20 +73,23 @@ public class UserService {
         User user = getUserOrThrow(userId);
         User otherUser = getUserOrThrow(otherId);
 
-        return new ArrayList<>(userStorage.findCommonFriends(user.getId(), otherUser.getId()));
+        List<Integer> common = new ArrayList<>(user.getFriends());
+        common.retainAll(otherUser.getFriends());
+
+        return common.stream()
+                .map(userStorage::findById)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toList());
     }
 
     private User getUserOrThrow(Integer userId) {
-        User user = userStorage.findById(userId);
-        if (user == null) {
+        Optional<User> user = userStorage.findById(userId);
+        if (user.isEmpty()) {
             log.warn("Failed to verify user. User is not registered.");
             throw new NotFoundException("User with given ID is not found.");
         }
-        return user;
-    }
-
-    public void clear() {
-        userStorage.clear();
+        return user.get();
     }
 }
 

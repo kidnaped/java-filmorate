@@ -1,3 +1,5 @@
+drop table if exists FILM, FILM_GENRE, FILM_LIKED, GENRE, MPA, APP_USER, FRIENDSHIP;
+
 create table if not exists MPA
 (
     MPA_ID   INTEGER auto_increment
@@ -61,6 +63,5 @@ create table if not exists FRIENDSHIP
         references APP_USER,
     FRIEND_ID INTEGER not null
         references APP_USER,
-    STATUS    BOOLEAN not null,
     primary key (USER_ID, FRIEND_ID)
 );

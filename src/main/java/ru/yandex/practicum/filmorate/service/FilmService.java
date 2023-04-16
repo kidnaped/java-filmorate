@@ -48,7 +48,7 @@ public class FilmService {
 
         filmStorage.addLike(film.getId(), user.getId());
 
-        return String.format("Film %s: %d likes", film.getName(), film.getLikes().size());
+        return String.format("Film: %s, liked by user: %s.", film.getName(), user.getName());
     }
 
     public String removeLike(Integer filmId, Integer userId) {
@@ -57,7 +57,7 @@ public class FilmService {
 
         filmStorage.deleteLike(film.getId(), user.getId());
 
-        return String.format("Film %s: %d likes", film.getName(), film.getLikes().size());
+        return String.format("Remove like by user: %s, from film: %s.", user.getName(), film.getName());
     }
 
     public List<Film> getPopularFilms(Integer count) {
@@ -65,20 +65,20 @@ public class FilmService {
     }
 
     private Film getFilmOrThrow(Integer filmId) {
-        Film film = filmStorage.findFilmById(filmId);
-        if (film == null) {
+        Optional<Film> film = filmStorage.findFilmById(filmId);
+        if (film.isEmpty()) {
             log.warn("Failed to validate film.");
             throw new NotFoundException("Film with given ID is not found.");
         }
-        return film;
+        return film.get();
     }
 
     private User getUserOrThrow(Integer userId) {
-        User user = userStorage.findById(userId);
-        if (user == null) {
+        Optional<User> user = userStorage.findById(userId);
+        if (user.isEmpty()) {
             throw new NotFoundException("User with given ID is not found.");
         }
-        return user;
+        return user.get();
     }
 
     private void validateReleaseDate(Film film) {
@@ -86,10 +86,5 @@ public class FilmService {
             log.warn("Failed to validate release date.");
             throw new ValidationException("Film release date must be after 28/12/1985.");
         }
-    }
-
-    public void clear() {
-        filmStorage.clear();
-        userStorage.clear();
     }
 }
