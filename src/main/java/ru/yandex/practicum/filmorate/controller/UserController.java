@@ -43,7 +43,7 @@ public class UserController {
     public List<User> getCommonFriends(
             @PathVariable Integer userId,
             @PathVariable Integer otherId
-    ){
+    ) {
         return userService.getCommonFriends(userId, otherId);
     }
 
@@ -51,7 +51,7 @@ public class UserController {
     public String addFriend(
             @PathVariable Integer userId,
             @PathVariable Integer friendId
-    ){
+    ) {
         return userService.makeFriends(userId, friendId);
     }
 
@@ -59,7 +59,7 @@ public class UserController {
     public String removeFriend(
             @PathVariable Integer userId,
             @PathVariable Integer friendId
-    ){
+    ) {
         return userService.stopBeingFriends(userId, friendId);
     }
 }

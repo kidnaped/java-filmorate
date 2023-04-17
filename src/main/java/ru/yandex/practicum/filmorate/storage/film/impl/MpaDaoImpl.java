@@ -14,6 +14,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MpaDaoImpl implements MpaDao {
     private final JdbcTemplate jdbcTemplate;
+
     @Override
     public List<Mpa> getMpa() {
         String sqlAllGetMpas = "SELECT * FROM MPA";
