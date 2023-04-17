@@ -4,7 +4,7 @@ create table if not exists MPA
 (
     MPA_ID   INTEGER auto_increment
         primary key,
-    MPA_NAME CHARACTER VARYING(8) not null
+    MPA_NAME CHARACTER VARYING not null
 );
 
 create table if not exists FILM
@@ -12,10 +12,12 @@ create table if not exists FILM
     FILM_ID      INTEGER auto_increment
         primary key,
     FILM_NAME    CHARACTER VARYING(24)  not null,
-    DESCRIPTION  CHARACTER VARYING(256) not null,
+    DESCRIPTION  CHARACTER VARYING(200) not null,
     RELEASE_DATE DATE                   not null,
     DURATION     INTEGER                not null,
-    MPA          CHARACTER VARYING(10)  not null
+    MPA          INTEGER,
+    constraint FILM_MPA_MPA_ID_FK
+        foreign key (MPA) references MPA (MPA_ID)
 );
 
 create table if not exists APP_USER

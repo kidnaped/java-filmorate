@@ -67,7 +67,7 @@ public class FilmDbStorage implements FilmStorage {
         if (!film.getGenres().isEmpty()) {
             for (Genre genre : film.getGenres()) {
                 String sqlAddGenre = "INSERT INTO FILM_GENRE (FILM_ID, GENRE_ID) VALUES (?, ?)";
-                jdbcTemplate.update(sqlAddGenre, film.getId(), genre.getId(), film.getId(), genre.getId());
+                jdbcTemplate.update(sqlAddGenre, film.getId(), genre.getId());
             }
         }
 
@@ -116,36 +116,37 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public Optional<Film> findFilmById(Integer filmId) {
+    public Film findFilmById(int filmId) {
         String sqlFindFilm = "SELECT * FROM FILM WHERE FILM_ID = ?";
-
-        return Optional.ofNullable(jdbcTemplate.queryForObject(sqlFindFilm, this::makeFilm, filmId));
+        if (isFilmExists(filmId, sqlFindFilm)) {
+            return jdbcTemplate.queryForObject(sqlFindFilm, this::makeFilm, filmId);
+        } else {
+            return null;
+        }
     }
 
     @Override
-    public void addLike(Integer filmId, Integer userId) {
+    public void addLike(int filmId, int userId) {
         String sqlAddLike = "INSERT INTO FILM_LIKED (FILM_ID, USER_ID) VALUES (?, ?)";
         jdbcTemplate.update(sqlAddLike, filmId, userId);
     }
 
     @Override
-    public void deleteLike(Integer filmId, Integer userId) {
+    public void deleteLike(int filmId, int userId) {
         String sqlAddLike = "DELETE FROM FILM_LIKED WHERE FILM_ID = ? AND USER_ID = ?";
         jdbcTemplate.update(sqlAddLike, filmId, userId);
     }
 
     @Override
-    public List<Film> getMostLikedFilms(Integer count) {
+    public List<Film> getMostLikedFilms(int count) {
         List<Film> films = new ArrayList<>(getFilms());
+        films.sort(Comparator.comparingInt(film -> film.getLikes().size()));
+        Collections.reverse(films);
+
         if (count > films.size()) {
             count = films.size();
         }
-        films.sort(Comparator.comparingInt(film -> film.getLikes().size()));
-        Collections.reverse(films);
-        if (count == 1) {
-            return films.subList(0, 0);
-        }
-        return films.subList(0, count - 1);
+        return films.subList(0, count);
     }
 
     private Film makeFilm(ResultSet rs, int rowNum) throws SQLException {
@@ -182,5 +183,10 @@ public class FilmDbStorage implements FilmStorage {
         film.getLikes().addAll(likes);
 
         return film;
+    }
+
+    private boolean isFilmExists(int filmId, String sql) {
+        SqlRowSet rowSet = jdbcTemplate.queryForRowSet(sql, filmId);
+        return rowSet.next();
     }
 }

@@ -1,18 +1,13 @@
 package ru.yandex.practicum.filmorate.model;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
 import java.util.*;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class Film {
-    @PositiveOrZero
     private int id;
     @NotBlank
     private String name;
@@ -24,10 +19,9 @@ public class Film {
     @NotNull
     @Positive
     private Integer duration;
-    @NotNull
     private Mpa mpa;
-    private Set<Genre> genres = new HashSet<>();
-    private Set<Integer> likes = new HashSet<>();
+    private Set<Genre> genres = new TreeSet<>(Comparator.comparingInt(Genre::getId));
+    private Set<Integer> likes = new TreeSet<>();
 
     public Map<String, Object> toMap() {
         Map<String, Object> map = new HashMap<>();
@@ -36,7 +30,7 @@ public class Film {
         map.put("RELEASE_DATE", releaseDate);
         map.put("DURATION", duration);
         if (mpa != null) {
-            map.put("MPA", mpa);
+            map.put("MPA", mpa.getId());
         }
         return map;
     }

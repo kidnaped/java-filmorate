@@ -3,13 +3,13 @@ package ru.yandex.practicum.filmorate.storage.user;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
+import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -44,21 +44,25 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public Optional<User> findById(Integer userId) {
+    public User findById(int userId) {
         String sqlGetById = "SELECT * FROM APP_USER WHERE USER_ID = ?";
-        return Optional.ofNullable(jdbcTemplate.queryForObject(sqlGetById, this::makeUser, userId));
+        if (userExists(userId, sqlGetById)) {
+            return jdbcTemplate.queryForObject(sqlGetById, this::makeUser, userId);
+        } else {
+            return null;
+        }
     }
 
     @Override
-    public void addFriend(Integer userId, Integer friendId) {
+    public void addFriend(int userId, int friendId) {
         String sqlAdd = "INSERT INTO FRIENDSHIP (USER_ID, FRIEND_ID) VALUES (?, ?)";
-        jdbcTemplate.update(sqlAdd, userId, friendId);
+        jdbcTemplate.update(sqlAdd, friendId, userId);
     }
 
     @Override
-    public void deleteFriend(Integer userId, Integer friendId) {
+    public void deleteFriend(int userId, int friendId) {
         String sqlDelete = "DELETE FROM FRIENDSHIP WHERE USER_ID = ? AND FRIEND_ID = ?";
-        jdbcTemplate.update(sqlDelete, userId, friendId);
+        jdbcTemplate.update(sqlDelete, friendId, userId);
     }
 
     private User makeUser(ResultSet rs, int rowNum) throws SQLException {
@@ -76,7 +80,12 @@ public class UserDbStorage implements UserStorage {
     private List<User> addFriendsToUser(Integer userId) {
         String sqlFindFriends = "SELECT * FROM APP_USER AS u " +
                 "JOIN FRIENDSHIP AS f ON u.USER_ID = f.USER_ID " +
-                "WHERE f.USER_ID = ?";
+                "WHERE f.FRIEND_ID = ?";
         return jdbcTemplate.query(sqlFindFriends, this::makeUser, userId);
+    }
+
+    private boolean userExists(Integer userid, String sql) {
+        SqlRowSet rowSet = jdbcTemplate.queryForRowSet(sql, userid);
+        return rowSet.next();
     }
 }

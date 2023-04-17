@@ -10,6 +10,7 @@ import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -23,11 +24,13 @@ public class UserService {
     }
 
     public User createUser(User user) {
+        setDefaultNameIfEmpty(user);
         return userStorage.create(user);
     }
 
     public User updateUser(User user) {
         getUserOrThrow(user.getId());
+        setDefaultNameIfEmpty(user);
         return userStorage.update(user);
     }
 
@@ -39,17 +42,18 @@ public class UserService {
         return userStorage.findAll();
     }
 
-    public List<User> findFriendsByUserId(Integer userId) {
+    public List<User> findFriendsByUserId(int userId) {
         User user = getUserOrThrow(userId);
-        List<Integer> friendsId = new ArrayList<>(user.getFriends());
+        Set<Integer> friendsId = user.getFriends();
         List<User> userFriends = new ArrayList<>();
-
-        friendsId.forEach(id -> userFriends.add(getUserOrThrow(id)));
+        for (Integer id : friendsId) {
+            userFriends.add(getUserOrThrow(id));
+        }
         return userFriends;
     }
 
     // addToFriendList
-    public String makeFriends(Integer userId, Integer friendId) {
+    public String makeFriends(int userId, int friendId) {
         User user = getUserOrThrow(userId);
         User friend = getUserOrThrow(friendId);
 
@@ -78,18 +82,22 @@ public class UserService {
 
         return common.stream()
                 .map(userStorage::findById)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
                 .collect(Collectors.toList());
     }
 
-    private User getUserOrThrow(Integer userId) {
-        Optional<User> user = userStorage.findById(userId);
-        if (user.isEmpty()) {
+    private User getUserOrThrow(int userId) {
+        User user = userStorage.findById(userId);
+        if (user == null) {
             log.warn("Failed to verify user. User is not registered.");
             throw new NotFoundException("User with given ID is not found.");
         }
-        return user.get();
+        return user;
+    }
+
+    private void setDefaultNameIfEmpty(User user) {
+        if (user.getName() == null || user.getName().isBlank() || user.getName().isEmpty()) {
+            user.setName(user.getLogin());
+        }
     }
 }
 

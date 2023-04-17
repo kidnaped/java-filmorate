@@ -34,7 +34,7 @@ public class FilmService {
         return filmStorage.updateFilm(film);
     }
 
-    public Film getFilmById(Integer filmId) {
+    public Film getFilmById(int filmId) {
        return getFilmOrThrow(filmId);
     }
 
@@ -42,7 +42,7 @@ public class FilmService {
         return filmStorage.getFilms();
     }
 
-    public String addLike(Integer filmId, Integer userId) {
+    public String addLike(int filmId, int userId) {
         Film film = getFilmOrThrow(filmId);
         User user = getUserOrThrow(userId);
 
@@ -51,7 +51,7 @@ public class FilmService {
         return String.format("Film: %s, liked by user: %s.", film.getName(), user.getName());
     }
 
-    public String removeLike(Integer filmId, Integer userId) {
+    public String removeLike(int filmId, int userId) {
         Film film = getFilmOrThrow(filmId);
         User user = getUserOrThrow(userId);
 
@@ -64,21 +64,21 @@ public class FilmService {
         return filmStorage.getMostLikedFilms(count);
     }
 
-    private Film getFilmOrThrow(Integer filmId) {
-        Optional<Film> film = filmStorage.findFilmById(filmId);
-        if (film.isEmpty()) {
+    private Film getFilmOrThrow(int filmId) {
+        Film film = filmStorage.findFilmById(filmId);
+        if (film == null) {
             log.warn("Failed to validate film.");
             throw new NotFoundException("Film with given ID is not found.");
         }
-        return film.get();
+        return film;
     }
 
-    private User getUserOrThrow(Integer userId) {
-        Optional<User> user = userStorage.findById(userId);
-        if (user.isEmpty()) {
+    private User getUserOrThrow(int userId) {
+        User user = userStorage.findById(userId);
+        if (user == null) {
             throw new NotFoundException("User with given ID is not found.");
         }
-        return user.get();
+        return user;
     }
 
     private void validateReleaseDate(Film film) {

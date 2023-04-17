@@ -12,8 +12,6 @@ import java.util.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class User {
-    @NotNull
-    @PositiveOrZero
     private int id;
     @NotBlank
     @Email
@@ -24,7 +22,7 @@ public class User {
     private String name;
     @PastOrPresent
     private LocalDate birthday;
-    private Set<Integer> friends;
+    private Set<Integer> friends = new HashSet<>();
 
     public Map<String, Object> toMap() {
         Map<String, Object> map = new HashMap<>();
