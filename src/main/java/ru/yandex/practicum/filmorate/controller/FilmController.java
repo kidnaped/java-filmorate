@@ -13,6 +13,7 @@ import java.util.List;
 @RequestMapping("/films")
 public class FilmController {
     private final FilmService filmService;
+
     @PostMapping
     public Film addFilm(@Valid @RequestBody Film film) {
         return filmService.addFilm(film);
@@ -37,7 +38,7 @@ public class FilmController {
     public String addLikeFromUser(
             @PathVariable Integer filmId,
             @PathVariable Integer userId
-    ){
+    ) {
         return filmService.addLike(filmId, userId);
     }
 
@@ -45,7 +46,7 @@ public class FilmController {
     public String removeLikeFromUser(
             @PathVariable Integer filmId,
             @PathVariable Integer userId
-    ){
+    ) {
         return filmService.removeLike(filmId, userId);
     }
 
