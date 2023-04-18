@@ -1,11 +1,12 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.*;
 import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.film.MpaDao;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
@@ -13,24 +14,22 @@ import java.util.*;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class FilmService {
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
-
-    @Autowired
-    public FilmService(FilmStorage filmStorage, UserStorage userStorage) {
-        this.filmStorage = filmStorage;
-        this.userStorage = userStorage;
-    }
+    private final MpaDao mpaDao;
 
     public Film addFilm(Film film) {
         validateReleaseDate(film);
+        setMpaForFilm(film);
         return filmStorage.addFilm(film);
     }
 
     public Film updateFilm(Film film) {
         getFilmOrThrow(film.getId());
         validateReleaseDate(film);
+        setMpaForFilm(film);
         return filmStorage.updateFilm(film);
     }
 
@@ -61,7 +60,14 @@ public class FilmService {
     }
 
     public List<Film> getPopularFilms(Integer count) {
-        return filmStorage.getMostLikedFilms(count);
+        List<Film> films = new ArrayList<>(filmStorage.getFilms());
+        films.sort(Comparator.comparingInt(film -> film.getLikes().size()));
+        Collections.reverse(films);
+
+        if (count > films.size()) {
+            count = films.size();
+        }
+        return films.subList(0, count);
     }
 
     private Film getFilmOrThrow(int filmId) {
@@ -85,6 +91,12 @@ public class FilmService {
         if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
             log.warn("Failed to validate release date.");
             throw new ValidationException("Film release date must be after 28/12/1985.");
+        }
+    }
+
+    private void setMpaForFilm(Film film) {
+        if (film.getMpa() != null) {
+            film.setMpa(mpaDao.getById(film.getMpa().getId()));
         }
     }
 }

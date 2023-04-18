@@ -4,7 +4,7 @@ create table if not exists MPA
 (
     MPA_ID   INTEGER auto_increment
         primary key,
-    MPA_NAME CHARACTER VARYING not null
+    MPA_NAME CHARACTER VARYING(24) not null
 );
 
 create table if not exists FILM

@@ -13,8 +13,6 @@ public interface FilmStorage {
 
     Film findFilmById(int filmId);
 
-    List<Film> getMostLikedFilms(int count);
-
     void addLike(int filmId, int userId);
 
     void deleteLike(int filmId, int userId);

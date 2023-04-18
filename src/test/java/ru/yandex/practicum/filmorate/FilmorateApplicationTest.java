@@ -11,6 +11,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.storage.film.impl.FilmDbStorage;
 import ru.yandex.practicum.filmorate.storage.film.impl.GenreDaoImpl;
@@ -33,6 +34,7 @@ class FilmorateApplicationTest {
     private final UserDbStorage userStorage;
     private final UserService userService;
     private final FilmDbStorage filmStorage;
+    private final FilmService filmService;
     private final MpaDaoImpl mpaDao;
     private final GenreDaoImpl genreDao;
     private User user1;
@@ -260,7 +262,7 @@ class FilmorateApplicationTest {
         filmStorage.addLike(film2.getId(), user1.getId());
         filmStorage.addLike(film2.getId(), user2.getId());
 
-        List<Film> films = filmStorage.getMostLikedFilms(2);
+        List<Film> films = filmService.getPopularFilms(2);
         assertEquals(2, films.size());
         assertEquals(2, films.get(0).getId());
     }
