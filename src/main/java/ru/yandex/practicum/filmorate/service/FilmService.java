@@ -1,49 +1,39 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.*;
 import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.film.MpaDao;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class FilmService {
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
-
-    @Autowired
-    public FilmService(FilmStorage filmStorage, UserStorage userStorage) {
-        this.filmStorage = filmStorage;
-        this.userStorage = userStorage;
-    }
+    private final MpaDao mpaDao;
 
     public Film addFilm(Film film) {
-        if (filmStorage.filmExists(film.getId())) {
-            log.warn("Failed to register film.");
-            throw new FailedRegistrationException("Film is already registered.");
-        }
         validateReleaseDate(film);
-
+        setMpaForFilm(film);
         return filmStorage.addFilm(film);
     }
 
     public Film updateFilm(Film film) {
-        if (!filmStorage.filmExists(film.getId())) {
-            log.warn("Failed to update film data: {}", film.getName());
-            throw new NotFoundException("Film is not found.");
-        }
+        getFilmOrThrow(film.getId());
         validateReleaseDate(film);
+        setMpaForFilm(film);
         return filmStorage.updateFilm(film);
     }
 
-    public Film getFilmById(Integer filmId) {
+    public Film getFilmById(int filmId) {
        return getFilmOrThrow(filmId);
     }
 
@@ -51,44 +41,45 @@ public class FilmService {
         return filmStorage.getFilms();
     }
 
-    public String addLike(Integer filmId, Integer userId) {
+    public String addLike(int filmId, int userId) {
         Film film = getFilmOrThrow(filmId);
         User user = getUserOrThrow(userId);
 
-        film.addLike(user.getId());
-        filmStorage.updateFilm(film);
+        filmStorage.addLike(film.getId(), user.getId());
 
-        return String.format("Film %s: %d likes", film.getName(), film.getLikes().size());
+        return String.format("Film: %s, liked by user: %s.", film.getName(), user.getName());
     }
 
-    public String removeLike(Integer filmId, Integer userId) {
+    public String removeLike(int filmId, int userId) {
         Film film = getFilmOrThrow(filmId);
         User user = getUserOrThrow(userId);
 
-        film.removeLike(user.getId());
-        filmStorage.updateFilm(film);
+        filmStorage.deleteLike(film.getId(), user.getId());
 
-        return String.format("Film %s: %d likes", film.getName(), film.getLikes().size());
+        return String.format("Remove like by user: %s, from film: %s.", user.getName(), film.getName());
     }
 
-    public List<Film> getMostLikedFilms(Integer count) {
+    public List<Film> getPopularFilms(Integer count) {
         List<Film> films = new ArrayList<>(filmStorage.getFilms());
+        films.sort(Comparator.comparingInt(film -> film.getLikes().size()));
+        Collections.reverse(films);
 
-        return films.stream()
-                .sorted((f1, f2) -> Integer.compare(f2.getLikes().size(), f1.getLikes().size()))
-                .limit(count)
-                .collect(Collectors.toList());
+        if (count > films.size()) {
+            count = films.size();
+        }
+        return films.subList(0, count);
     }
 
-    private Film getFilmOrThrow(Integer filmId) {
+    private Film getFilmOrThrow(int filmId) {
         Film film = filmStorage.findFilmById(filmId);
         if (film == null) {
+            log.warn("Failed to validate film.");
             throw new NotFoundException("Film with given ID is not found.");
         }
         return film;
     }
 
-    private User getUserOrThrow(Integer userId) {
+    private User getUserOrThrow(int userId) {
         User user = userStorage.findById(userId);
         if (user == null) {
             throw new NotFoundException("User with given ID is not found.");
@@ -103,8 +94,9 @@ public class FilmService {
         }
     }
 
-    public void clear() {
-        filmStorage.clear();
-        userStorage.clear();
+    private void setMpaForFilm(Film film) {
+        if (film.getMpa() != null) {
+            film.setMpa(mpaDao.getById(film.getMpa().getId()));
+        }
     }
 }

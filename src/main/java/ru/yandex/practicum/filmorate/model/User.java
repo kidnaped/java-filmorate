@@ -1,16 +1,17 @@
 package ru.yandex.practicum.filmorate.model;
 
-import lombok.Builder;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class User {
-    @PositiveOrZero
     private int id;
     @NotBlank
     @Email
@@ -21,16 +22,14 @@ public class User {
     private String name;
     @PastOrPresent
     private LocalDate birthday;
-    private final Set<Integer> friends = new HashSet<>();
+    private Set<Integer> friends = new HashSet<>();
 
-    public void addFriend(Integer id) {
-        friends.add(id);
-    }
-    public void removeFriend(Integer id) {
-        friends.remove(id);
-    }
-
-    public Set<Integer> getFriends() {
-        return friends;
+    public Map<String, Object> toMap() {
+        Map<String, Object> map = new HashMap<>();
+        map.put("EMAIL", email);
+        map.put("LOGIN", login);
+        map.put("USER_NAME", name);
+        map.put("BIRTHDAY", birthday);
+        return map;
     }
 }

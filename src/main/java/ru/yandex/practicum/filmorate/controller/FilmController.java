@@ -38,7 +38,7 @@ public class FilmController {
     public String addLikeFromUser(
             @PathVariable Integer filmId,
             @PathVariable Integer userId
-    ){
+    ) {
         return filmService.addLike(filmId, userId);
     }
 
@@ -46,17 +46,13 @@ public class FilmController {
     public String removeLikeFromUser(
             @PathVariable Integer filmId,
             @PathVariable Integer userId
-    ){
+    ) {
         return filmService.removeLike(filmId, userId);
     }
 
     @GetMapping("/popular")
     public List<Film> findMostLikedFilms(@RequestParam(defaultValue = "10") Integer count) {
-        return filmService.getMostLikedFilms(count);
-    }
-
-    protected void clear() {
-        filmService.clear();
+        return filmService.getPopularFilms(count);
     }
 }
 

@@ -3,7 +3,6 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.FailedRegistrationException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
@@ -24,20 +23,12 @@ public class UserService {
     }
 
     public User createUser(User user) {
-        if (userStorage.userExists(user.getId())) {
-            log.warn("Failed to add new user: {}", user.getName());
-            throw new FailedRegistrationException("User is already registered.");
-        }
         setDefaultNameIfEmpty(user);
-
         return userStorage.create(user);
     }
 
     public User updateUser(User user) {
-        if (!userStorage.userExists(user.getId())) {
-            log.warn("Failed to update user's data: {}", user.getName());
-            throw new NotFoundException("User is not found.");
-        }
+        getUserOrThrow(user.getId());
         setDefaultNameIfEmpty(user);
         return userStorage.update(user);
     }
@@ -50,28 +41,24 @@ public class UserService {
         return userStorage.findAll();
     }
 
-    public List<User> findFriendsByUserId(Integer userId) {
+    public List<User> findFriendsByUserId(int userId) {
         User user = getUserOrThrow(userId);
-        List<Integer> friendsId = new ArrayList<>(user.getFriends());
+        Set<Integer> friendsId = user.getFriends();
         List<User> userFriends = new ArrayList<>();
-
-        friendsId.forEach(id -> userFriends.add(userStorage.findById(id)));
-
+        for (Integer id : friendsId) {
+            userFriends.add(getUserOrThrow(id));
+        }
         return userFriends;
     }
 
     // addToFriendList
-    public String makeFriends(Integer userId, Integer friendId) {
+    public String makeFriends(int userId, int friendId) {
         User user = getUserOrThrow(userId);
         User friend = getUserOrThrow(friendId);
 
-        user.addFriend(friendId);
-        userStorage.update(user);
+        userStorage.addFriend(user.getId(), friend.getId());
 
-        friend.addFriend(userId);
-        userStorage.update(friend);
-
-        return String.format("%s and %s are friends.", user.getName(), friend.getName());
+        return String.format("%s added %s in a friends list.", user.getName(), friend.getName());
     }
 
     // removeFromFriendList
@@ -79,13 +66,9 @@ public class UserService {
         User user = getUserOrThrow(userId);
         User friend = getUserOrThrow(friendId);
 
-        user.removeFriend(friend.getId());
-        userStorage.update(user);
+        userStorage.deleteFriend(user.getId(), friend.getId());
 
-        friend.removeFriend(user.getId());
-        userStorage.update(friend);
-
-        return String.format("%s and %s are not friends.", user.getName(), friend.getName());
+        return String.format("%s removed %s from a friends list.", user.getName(), friend.getName());
     }
 
     // getCommonFriends
@@ -93,18 +76,15 @@ public class UserService {
         User user = getUserOrThrow(userId);
         User otherUser = getUserOrThrow(otherId);
 
-        Set<Integer> userFriends = user.getFriends();
-        Set<Integer> otherUserFriends = otherUser.getFriends();
-
-        List<Integer> common = new ArrayList<>(userFriends);
-        common.retainAll(otherUserFriends);
+        List<Integer> common = new ArrayList<>(user.getFriends());
+        common.retainAll(otherUser.getFriends());
 
         return common.stream()
                 .map(userStorage::findById)
                 .collect(Collectors.toList());
     }
 
-    private User getUserOrThrow(Integer userId) {
+    private User getUserOrThrow(int userId) {
         User user = userStorage.findById(userId);
         if (user == null) {
             log.warn("Failed to verify user. User is not registered.");
@@ -117,10 +97,6 @@ public class UserService {
         if (user.getName() == null || user.getName().isBlank() || user.getName().isEmpty()) {
             user.setName(user.getLogin());
         }
-    }
-
-    public void clear() {
-        userStorage.clear();
     }
 }
 
